@@ -9,6 +9,12 @@ from .models import Snippet
 
 User = get_user_model()
 
+DUMMY_USER_USERNAME = 'dummy_username'
+
+
+def get_dummy_user():
+    return User.objects.create_user(username=DUMMY_USER_USERNAME)
+
 
 class SnippetListTest(APITestCase):
     """
@@ -35,7 +41,7 @@ class SnippetListTest(APITestCase):
             테스트시 임의로 몇 개의 Snippet을 만들고 진행 (테스트DB는 초기화된 상태로 시작)
         :return:
         """
-        user = User.objects.create_user(username='lhy')
+        user = get_dummy_user()
         for i in range(random.randint(10, 100)):
             Snippet.objects.create(
                 code=f'a = {i}',
@@ -53,7 +59,7 @@ class SnippetListTest(APITestCase):
         Snippet List의 결과가 생성일자 내림차순인지 확인
         :return:
         """
-        user = User.objects.create_user(username='lhy')
+        user = get_dummy_user()
         for i in range(random.randint(5, 10)):
             Snippet.objects.create(
                 code=f'a = {i}',
@@ -100,7 +106,8 @@ class SnippetCreateTest(APITestCase):
         #     data=CREATE_DATA,
         #     content_type='application/json',
         # )
-
+        user = get_dummy_user()
+        self.client.force_authenticate(user=user)
         response = self.client.post(
             self.URL,
             data={
@@ -124,6 +131,8 @@ class SnippetCreateTest(APITestCase):
             'style': 'monokai',
         }
 
+        user = get_dummy_user()
+        self.client.force_authenticate(user=user)
         response = self.client.post(
             self.URL,
             data=snippet_data,
@@ -135,6 +144,9 @@ class SnippetCreateTest(APITestCase):
         # response로 받은 데이터와 Snippet생성시 사용한 데이터가 같은지 확인
         for key in snippet_data:
             self.assertEqual(data[key], snippet_data[key])
+
+        # Snippet생성과정에서 사용된 user가 owner인지 확인
+        self.assertEqual(data['owner'], user.username)
 
     def test_snippet_create_missing_code_raise_exception(self):
         """
@@ -148,6 +160,8 @@ class SnippetCreateTest(APITestCase):
             'language': 'c',
             'style': 'monokai',
         }
+        user = get_dummy_user()
+        self.client.force_authenticate(user=user)
         response = self.client.post(
             self.URL,
             data=snippet_data,
