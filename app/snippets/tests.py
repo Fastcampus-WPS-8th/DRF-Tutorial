@@ -1,10 +1,13 @@
 import json
 import random
 
+from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from .models import Snippet
+
+User = get_user_model()
 
 
 class SnippetListTest(APITestCase):
@@ -32,8 +35,12 @@ class SnippetListTest(APITestCase):
             테스트시 임의로 몇 개의 Snippet을 만들고 진행 (테스트DB는 초기화된 상태로 시작)
         :return:
         """
+        user = User.objects.create_user(username='lhy')
         for i in range(random.randint(10, 100)):
-            Snippet.objects.create(code=f'a = {i}')
+            Snippet.objects.create(
+                code=f'a = {i}',
+                owner=user,
+            )
         response = self.client.get(self.URL)
         data = json.loads(response.content)
 
@@ -46,8 +53,12 @@ class SnippetListTest(APITestCase):
         Snippet List의 결과가 생성일자 내림차순인지 확인
         :return:
         """
+        user = User.objects.create_user(username='lhy')
         for i in range(random.randint(5, 10)):
-            Snippet.objects.create(code=f'a = {i}')
+            Snippet.objects.create(
+                code=f'a = {i}',
+                owner=user,
+            )
         response = self.client.get(self.URL)
         data = json.loads(response.content)
         # snippets = Snippet.objects.order_by('-created')
