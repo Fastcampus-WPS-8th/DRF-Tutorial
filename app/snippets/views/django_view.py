@@ -4,7 +4,7 @@ from rest_framework.parsers import JSONParser
 from rest_framework.renderers import JSONRenderer
 
 from ..models import Snippet
-from ..serializers import SnippetSerializer
+from ..serializers import SnippetListSerializer
 
 __all__ = (
     'snippet_list',
@@ -23,13 +23,13 @@ class JSONResponse(HttpResponse):
 def snippet_list(request):
     if request.method == 'GET':
         snippets = Snippet.objects.order_by('-created')
-        serializer = SnippetSerializer(snippets, many=True)
+        serializer = SnippetListSerializer(snippets, many=True)
         json_data = JSONRenderer().render(serializer.data)
         return HttpResponse(json_data, content_type='application/json')
 
     elif request.method == 'POST':
         data = JSONParser().parse(request)
-        serializer = SnippetSerializer(data=data)
+        serializer = SnippetListSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return JSONResponse(serializer.data, status=201)
@@ -44,12 +44,12 @@ def snippet_detail(request, pk):
         return HttpResponse(status=404)
 
     if request.method == 'GET':
-        serializer = SnippetSerializer(snippet)
+        serializer = SnippetListSerializer(snippet)
         return JSONResponse(serializer.data)
 
     elif request.method == 'PUT':
         data = JSONParser().parse(request)
-        serializer = SnippetSerializer(snippet, data=data)
+        serializer = SnippetListSerializer(snippet, data=data)
         if serializer.is_valid():
             serializer.save()
             return JSONResponse(serializer.data)
@@ -57,7 +57,7 @@ def snippet_detail(request, pk):
 
     elif request.method == 'PATCH':
         data = JSONParser().parse(request)
-        serializer = SnippetSerializer(snippet, data=data, partial=True)
+        serializer = SnippetListSerializer(snippet, data=data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return JSONResponse(serializer.data)
