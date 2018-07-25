@@ -28,7 +28,7 @@ class Snippet(models.Model):
         ordering = ('created',)
 
     def save(self, *args, **kwargs):
-        ## 이렇게 하면 HTML이 저장됩니다
+        # 이렇게 하면 HTML이 저장됩니다
         # 지정한 언어(language)에 대한 분석기 (lexer)할당
         lexer = get_lexer_by_name(self.language)
         # 줄 표시 여부
